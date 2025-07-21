@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sante/screens/form_page.dart';
+import 'package:sante/screens/home.dart';
 import 'package:sante/screens/login_page.dart'; 
 void main() {
   runApp(const MyApp());
