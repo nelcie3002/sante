@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sante/widgets/custom_button.dart';
 
-
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({super.key});
 
@@ -10,69 +9,92 @@ class ConnexionPage extends StatefulWidget {
 }
 
 class _ConnexionPageState extends State<ConnexionPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _ideController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-
+  // Définir la couleur principale
+  final Color primaryColor = const Color(0xFF14A09D);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
-                Image.asset('assets/logo.png', height: 80),
-                const SizedBox(height: 24),
+                Text(
+                  'GREEN\nSANTE',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 const Text(
                   'CONNEXION',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Text('Connectez-vous sur Vyn'),
                 const SizedBox(height: 32),
-                TextField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Adresse e-mail',
-                    hintText: 'Entrez votre adresse e-mail',
-                    border: OutlineInputBorder(),
-                    errorStyle: TextStyle(color: Colors.red),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Mot de passe',
-                    hintText: 'Entrez votre mot de passe',
-                    border: OutlineInputBorder(),
-                    errorStyle: TextStyle(color: Colors.red),
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _ideController,
+                          decoration: const InputDecoration(
+                            labelText: 'IDE',
+                            hintText: 'Value',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Mot de passe',
+                            hintText: 'Value',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        CustomButton(
+                          text: 'Se connecter',
+                          onPressed: () {
+                            // Action login
+                          },
+                          color: primaryColor, // Passe la couleur ici
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                CustomButton(
-                  text: 'Se connecter',
-                  onPressed: () {
-                   
-                  },
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Vous n'avez pas de compte ? "),
+                    const Text("Vous n’avez pas de compte ? "),
                     GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, '/inscription');
                       },
                       child: const Text(
-                        "S'inscrire",
+                        "Inscrivez-vous",
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
@@ -87,7 +109,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     Navigator.pushNamed(context, '/mdp_oublie');
                   },
                   child: const Text(
-                    "Mot de passe oublié ?",
+                    "Mot de passe oublié ? Cliquez ici",
                     style: TextStyle(
                       color: Colors.blue,
                       fontWeight: FontWeight.bold,

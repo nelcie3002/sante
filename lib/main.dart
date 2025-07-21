@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sante/screens/infos.dart';
+import 'package:sante/screens/form_page.dart';
 import 'package:sante/screens/login_page.dart'; 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Infos(), 
+      home: const FormulairePage(), 
     );
   }
 }
