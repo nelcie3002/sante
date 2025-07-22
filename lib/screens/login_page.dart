@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sante/widgets/custom_button.dart';
+import 'package:sante/controllers/auth_controller.dart';
 
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({super.key});
@@ -11,9 +12,12 @@ class ConnexionPage extends StatefulWidget {
 class _ConnexionPageState extends State<ConnexionPage> {
   final TextEditingController _ideController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthController _authController = AuthController();
 
   // Définir la couleur principale
   final Color primaryColor = const Color(0xFF14A09D);
+  bool _loading = false;
+  String? _error;
 
   @override
   Widget build(BuildContext context) {
@@ -75,11 +79,27 @@ class _ConnexionPageState extends State<ConnexionPage> {
                         const SizedBox(height: 24),
                         CustomButton(
                           text: 'Se connecter',
-                          onPressed: () {
-                            // Action login
+                          onPressed: () async {
+                            setState(() {
+                              _loading = true;
+                              _error = null;
+                            });
+                            String email = _ideController.text.trim();
+                            String password = _passwordController.text.trim();
+                            String? error = await _authController.login(email, password);
+                            setState(() {
+                              _loading = false;
+                              _error = error;
+                            });
+                            if (error == null) {
+                              // Naviguer vers la page d'accueil ou autre
+                              Navigator.pushReplacementNamed(context, '/home');
+                            }
                           },
                           color: primaryColor, // Passe la couleur ici
                         ),
+                        if (_loading) const CircularProgressIndicator(),
+                        if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),

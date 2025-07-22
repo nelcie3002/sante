@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "622166045609",
-    "project_id": "sante-88c2f",
-    "storage_bucket": "sante-88c2f.firebasestorage.app"
+    "project_number": "525423573907",
+    "project_id": "health-6a922",
+    "storage_bucket": "health-6a922.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:622166045609:android:6680ba3f2a9febd0f2cab8",
+        "mobilesdk_app_id": "1:525423573907:android:5cec0cbdb47b7389164666",
         "android_client_info": {
           "package_name": "com.example.sante"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBPg_uvg0wpHvpnBvzi24ozS0tkMlmW5sU"
+          "current_key": "AIzaSyBoIFhaxWrrA7RqLx4xZ8P-o3j3wQxXkGc"
         }
       ],
       "services": {
