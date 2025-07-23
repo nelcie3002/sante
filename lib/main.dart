@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sante/firebase_options.dart';
+import 'package:sante/screens/home.dart'; 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:sante/screens/login_page.dart';
 
@@ -23,6 +24,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const ConnexionPage(), 
+       routes: {
+        '/home': (context) => const Home(), 
+      },
     );
   }
 }
