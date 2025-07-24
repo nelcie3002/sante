@@ -14,7 +14,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthController _authController = AuthController();
 
-  // Définir la couleur principale
   final Color primaryColor = const Color(0xFF14A09D);
   bool _loading = false;
   String? _error;
@@ -84,22 +83,29 @@ class _ConnexionPageState extends State<ConnexionPage> {
                               _loading = true;
                               _error = null;
                             });
+
                             String email = _ideController.text.trim();
                             String password = _passwordController.text.trim();
                             String? error = await _authController.login(email, password);
+
                             setState(() {
                               _loading = false;
                               _error = error;
                             });
+
                             if (error == null) {
-                              // Naviguer vers la page d'accueil ou autre
                               Navigator.pushReplacementNamed(context, '/home');
                             }
                           },
-                          color: primaryColor, // Passe la couleur ici
+                          color: primaryColor,
                         ),
+                        const SizedBox(height: 12),
                         if (_loading) const CircularProgressIndicator(),
-                        if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
+                        if (_error != null)
+                          Text(
+                            _error!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
                       ],
                     ),
                   ),
@@ -111,7 +117,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                     const Text("Vous n’avez pas de compte ? "),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, '/inscription');
+                        Navigator.pushNamed(context, '/register'); //  MODIFIÉ
                       },
                       child: const Text(
                         "Inscrivez-vous",
@@ -126,7 +132,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/mdp_oublie');
+                    Navigator.pushNamed(context, '/reset_password'); // modifié
                   },
                   child: const Text(
                     "Mot de passe oublié ? Cliquez ici",

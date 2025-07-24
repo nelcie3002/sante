@@ -5,6 +5,8 @@ import 'package:sante/screens/home.dart';
 import 'package:sante/screens/login_page.dart';
 import 'package:sante/screens/form_page.dart'; 
 import 'package:sante/screens/infos.dart';
+import 'package:sante/screens/register_page.dart';
+import 'package:sante/screens/reset_password_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -29,6 +31,9 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const Home(),
         '/nouvelle_consultation': (context) => const FormulairePage(), 
         '/infos': (context) => const Infos(),
+        '/register': (context) => const RegisterPage(),
+        '/reset_password': (context) => const ResetPasswordPage(),
+
       },
     );
   }
