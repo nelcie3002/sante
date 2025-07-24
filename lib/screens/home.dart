@@ -43,20 +43,34 @@ class _HomeState extends State<Home> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
+           // Barre de recherche ajoutée ici
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Rechercher une consultation...",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // Boutons d'action
             _HomeActionButton(title: "CONSULTATIONS PRECEDENTES", onTap: () {}),
             const SizedBox(height: 12),
             _HomeActionButton(
               title: "CREER UNE NOUVELLE CONSULTATION",
               onTap: () {
-                Navigator.pushNamed(context, '/nouvelle_consultation'); // MODIFICATION ICI
+                Navigator.pushNamed(context, '/nouvelle_consultation');
               },
             ),
             const SizedBox(height: 12),
-            _HomeActionButton(title: "RECHERCHER UNE CONSULTATION", onTap: () {}),
-            const SizedBox(height: 12),
+
             _HomeActionButton(title: "GENERER UN RAPPORT", onTap: () {}),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
+           
 
             // Consultations récentes
             const Text(
