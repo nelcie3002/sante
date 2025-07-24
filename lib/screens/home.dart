@@ -16,7 +16,9 @@ class _HomeState extends State<Home> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.person, color: Colors.black87),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/infos'); 
+          },
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,

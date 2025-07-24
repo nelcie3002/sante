@@ -4,7 +4,7 @@ import 'package:sante/firebase_options.dart';
 import 'package:sante/screens/home.dart';
 import 'package:sante/screens/login_page.dart';
 import 'package:sante/screens/form_page.dart'; 
-
+import 'package:sante/screens/infos.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const ConnexionPage(),
         '/home': (context) => const Home(),
         '/nouvelle_consultation': (context) => const FormulairePage(), 
+        '/infos': (context) => const Infos(),
       },
     );
   }
