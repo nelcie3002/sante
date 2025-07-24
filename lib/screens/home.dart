@@ -44,7 +44,12 @@ class _HomeState extends State<Home> {
             // Boutons d'action
             _HomeActionButton(title: "CONSULTATIONS PRECEDENTES", onTap: () {}),
             const SizedBox(height: 12),
-            _HomeActionButton(title: "CREER UNE NOUVELLE CONSULTATION", onTap: () {}),
+            _HomeActionButton(
+              title: "CREER UNE NOUVELLE CONSULTATION",
+              onTap: () {
+                Navigator.pushNamed(context, '/nouvelle_consultation'); // MODIFICATION ICI
+              },
+            ),
             const SizedBox(height: 12),
             _HomeActionButton(title: "RECHERCHER UNE CONSULTATION", onTap: () {}),
             const SizedBox(height: 12),
@@ -57,7 +62,6 @@ class _HomeState extends State<Home> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
             const SizedBox(height: 8),
-            // Tableau des consultations récentes
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
@@ -114,7 +118,6 @@ class _HomeActionButton extends StatelessWidget {
   const _HomeActionButton({
     required this.title,
     required this.onTap,
-    super.key,
   });
 
   @override

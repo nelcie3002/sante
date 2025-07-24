@@ -154,7 +154,6 @@ class _OldConsultationTile extends StatelessWidget {
   const _OldConsultationTile({
     required this.date,
     required this.motif,
-    super.key,
   });
 
   @override

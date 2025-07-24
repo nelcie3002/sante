@@ -104,7 +104,6 @@ class _SectionCard extends StatelessWidget {
     required this.title,
     required this.child,
     required this.onEdit,
-    super.key,
   });
 
   @override

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:sante/firebase_options.dart';
-import 'package:sante/screens/home.dart'; 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:sante/firebase_options.dart';
+import 'package:sante/screens/home.dart';
 import 'package:sante/screens/login_page.dart';
+import 'package:sante/screens/form_page.dart'; 
 
 void main() async {
-   WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-);
-
+  );
   runApp(const MyApp());
 }
 
@@ -23,9 +23,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const ConnexionPage(), 
-       routes: {
-        '/home': (context) => const Home(), 
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const ConnexionPage(),
+        '/home': (context) => const Home(),
+        '/nouvelle_consultation': (context) => const FormulairePage(), 
       },
     );
   }
