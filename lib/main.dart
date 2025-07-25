@@ -7,6 +7,7 @@ import 'package:sante/screens/form_page.dart';
 import 'package:sante/screens/infos.dart';
 import 'package:sante/screens/register_page.dart';
 import 'package:sante/screens/reset_password_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -35,6 +36,15 @@ class MyApp extends StatelessWidget {
         '/reset_password': (context) => const ResetPasswordPage(),
 
       },
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+        Locale('en', 'US'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sante/model/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -32,7 +35,30 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 12),
             _buildTextField(_prenomController, "Prénoms"),
             const SizedBox(height: 12),
-            _buildTextField(_dateNaissanceController, "Date de naissance", hint: "jj/mm/aaaa"),
+            GestureDetector(
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime(2000),
+                  firstDate: DateTime(1900),
+                  lastDate: DateTime.now(),
+                  locale: const Locale('fr', 'FR'),
+                );
+                if (pickedDate != null) {
+                  _dateNaissanceController.text =
+                      "${pickedDate.day.toString().padLeft(2, '0')}/"
+                      "${pickedDate.month.toString().padLeft(2, '0')}/"
+                      "${pickedDate.year}";
+                }
+              },
+              child: AbsorbPointer(
+                child: _buildTextField(
+                  _dateNaissanceController,
+                  "Date de naissance",
+                  hint: "jj/mm/aaaa",
+                ),
+              ),
+            ),
             const SizedBox(height: 12),
             _buildDropdownField(),
             const SizedBox(height: 12),
@@ -45,28 +71,47 @@ class _RegisterPageState extends State<RegisterPage> {
                 backgroundColor: Colors.teal,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               ),
-              onPressed: () {
+              onPressed: () async {
                 final nom = _nomController.text.trim();
                 final prenom = _prenomController.text.trim();
                 final dateNaissance = _dateNaissanceController.text.trim();
-                final sexe = _sexe;
+                final sexe = _sexe ?? '';
                 final ide = _ideController.text.trim();
                 final motDePasse = _passwordController.text.trim();
 
-                // TODO: Envoyer ces données vers ton backend Firebase ou base de données
+                try {
+                  // 1. Création du compte dans Firebase Auth
+                  UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                    email: ide,
+                    password: motDePasse,
+                  );
 
-                print("Nom: $nom");
-                print("Prénoms: $prenom");
-                print("Date de naissance: $dateNaissance");
-                print("Sexe: $sexe");
-                print("Email: $ide");
-                print("Mot de passe: $motDePasse");
+                  // 2. Création du modèle utilisateur
+                  final utilisateur = Utilisateur(
+                    id: userCredential.user!.uid, // Utilise l'UID Firebase Auth
+                    nom: nom,
+                    prenom: prenom,
+                    dateNaissance: dateNaissance,
+                    sexe: sexe,
+                    email: ide,
+                  );
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Compte créé avec succès !')),
-                );
+                  // 3. Ajout à Firestore
+                  await FirebaseFirestore.instance
+                      .collection('utilisateur')
+                      .doc(utilisateur.id)
+                      .set(utilisateur.toMap());
 
-                Navigator.pushReplacementNamed(context, '/');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Compte créé avec succès !')),
+                  );
+
+                  Navigator.pushReplacementNamed(context, '/');
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur : ${e.toString()}')),
+                  );
+                }
               },
               child: const Text("S'inscrire", style: TextStyle(color: Colors.white)),
             ),
