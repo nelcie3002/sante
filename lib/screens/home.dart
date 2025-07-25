@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -8,6 +10,29 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  String userPrenom = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserName();
+  }
+
+  Future<void> fetchUserName() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      final doc =
+          await FirebaseFirestore.instance.collection('utilisateur').doc(uid).get();
+      if (doc.exists) {
+        setState(() {
+          userPrenom = doc.data()?['prenom'] ?? '';
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,19 +42,19 @@ class _HomeState extends State<Home> {
         leading: IconButton(
           icon: const Icon(Icons.person, color: Colors.black87),
           onPressed: () {
-            Navigator.pushNamed(context, '/infos'); 
+            Navigator.pushNamed(context, '/infos');
           },
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: const [
-            Text(
+          children: [
+            const Text(
               "Hello, ",
               style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w500),
             ),
             Text(
-              "Vincent",
-              style: TextStyle(
+              isLoading ? "..." : userPrenom,
+              style: const TextStyle(
                 color: Colors.teal,
                 fontWeight: FontWeight.bold,
               ),
@@ -44,7 +69,6 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-           // Barre de recherche ajoutée ici
             TextField(
               decoration: InputDecoration(
                 hintText: "Rechercher une consultation...",
@@ -57,7 +81,6 @@ class _HomeState extends State<Home> {
             ),
             const SizedBox(height: 24),
 
-            // Boutons d'action
             _HomeActionButton(title: "CONSULTATIONS PRECEDENTES", onTap: () {}),
             const SizedBox(height: 12),
             _HomeActionButton(
@@ -67,12 +90,9 @@ class _HomeState extends State<Home> {
               },
             ),
             const SizedBox(height: 12),
-
             _HomeActionButton(title: "GENERER UN RAPPORT", onTap: () {}),
             const SizedBox(height: 12),
-           
 
-            // Consultations récentes
             const Text(
               "CONSULTATIONS RECENTES",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
