@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FormulairePage extends StatefulWidget {
   const FormulairePage({super.key});
@@ -11,6 +13,7 @@ class _FormulairePageState extends State<FormulairePage> {
   final TextEditingController _nomController = TextEditingController();
   final TextEditingController _prenomController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _cmuController = TextEditingController();
   final TextEditingController _autreConsultationController = TextEditingController();
 
   String? _sexe;
@@ -18,31 +21,10 @@ class _FormulairePageState extends State<FormulairePage> {
 
   final List<String> sexes = ['Homme', 'Femme', 'Autre'];
   final List<String> consultations = [
-    'NÉGATIF',
-    'POSITIF',
-    'PALUDISME SIMPLE',
-    'TOUX',
-    'RHUME',
-    'ANGINE',
-    'ORL',
-    'DIARRHÉE',
-    'VARICELLE',
-    'DERMATOSE',
-    'ANÉMIE',
-    'ASTHME',
-    'ACCIDENT DE LA VOIE PUBLIQUE',
-    'BRULURE',
-    'AVC',
-    'LOMBALGIE',
-    'HTA',
-    'TRAUMATISME',
-    'MORSURE DE SERPENT/SCORPION',
-    'SYNDROME INFECTIEUX',
-    'IST',
-    'ULCÈRE',
-    'REFERE',
-    'MEO',
-    'AUTRES MALADIES',
+    'NÉGATIF', 'POSITIF', 'PALUDISME SIMPLE', 'TOUX', 'RHUME', 'ANGINE', 'ORL',
+    'DIARRHÉE', 'VARICELLE', 'DERMATOSE', 'ANÉMIE', 'ASTHME', 'ACCIDENT DE LA VOIE PUBLIQUE',
+    'BRULURE', 'AVC', 'LOMBALGIE', 'HTA', 'TRAUMATISME', 'MORSURE DE SERPENT/SCORPION',
+    'SYNDROME INFECTIEUX', 'IST', 'ULCÈRE', 'REFERE', 'MEO', 'AUTRES MALADIES',
   ];
 
   @override
@@ -60,9 +42,7 @@ class _FormulairePageState extends State<FormulairePage> {
             child: Column(
               children: [
                 Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 2,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -72,32 +52,22 @@ class _FormulairePageState extends State<FormulairePage> {
                         const SizedBox(height: 12),
                         _buildTextField(_prenomController, 'Prénoms'),
                         const SizedBox(height: 12),
-                        _buildTextField(
-                          _ageController,
-                          'Âge',
-                          keyboardType: TextInputType.number,
-                        ),
+                        _buildTextField(_cmuController, 'Numéro CMU'),
+                        const SizedBox(height: 12),
+                        _buildTextField(_ageController, 'Âge', keyboardType: TextInputType.number),
                         const SizedBox(height: 12),
                         _buildDropdownField(
                           label: 'Sexe',
                           value: _sexe,
                           items: sexes,
-                          onChanged: (value) {
-                            setState(() {
-                              _sexe = value;
-                            });
-                          },
+                          onChanged: (value) => setState(() => _sexe = value),
                         ),
                         const SizedBox(height: 12),
                         _buildDropdownField(
                           label: 'Consultation',
                           value: _consultation,
                           items: consultations,
-                          onChanged: (value) {
-                            setState(() {
-                              _consultation = value;
-                            });
-                          },
+                          onChanged: (value) => setState(() => _consultation = value),
                         ),
                         if (_consultation == 'AUTRES MALADIES') ...[
                           const SizedBox(height: 12),
@@ -121,32 +91,53 @@ class _FormulairePageState extends State<FormulairePage> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () {
-                      final nom = _nomController.text;
-                      final prenom = _prenomController.text;
-                      final age = _ageController.text;
+                    onPressed: () async {
+                      final nom = _nomController.text.trim();
+                      final prenom = _prenomController.text.trim();
+                      final cmu = _cmuController.text.trim();
+                      final age = _ageController.text.trim();
                       final sexe = _sexe;
                       final consultationFinale = _consultation == 'AUTRES MALADIES'
-                          ? _autreConsultationController.text
+                          ? _autreConsultationController.text.trim()
                           : _consultation;
 
-                      // Ici tu peux traiter les données, les envoyer à un backend, ou les afficher :
-                      print('Nom : $nom');
-                      print('Prénom : $prenom');
-                      print('Âge : $age');
-                      print('Sexe : $sexe');
-                      print('Consultation : $consultationFinale');
+                      final uid = FirebaseAuth.instance.currentUser?.uid;
+
+                      if (uid != null &&
+                          nom.isNotEmpty &&
+                          prenom.isNotEmpty &&
+                          age.isNotEmpty &&
+                          cmu.isNotEmpty &&
+                          sexe != null &&
+                          consultationFinale != null &&
+                          consultationFinale!.isNotEmpty) {
+                        await FirebaseFirestore.instance.collection('consultations').add({
+                          'nom': nom,
+                          'prenom': prenom,
+                          'cmu': cmu,
+                          'age': age,
+                          'sexe': sexe,
+                          'consultation': consultationFinale,
+                          'date': DateTime.now().toIso8601String(),
+                          'createdBy': uid,
+                        });
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Consultation enregistrée avec succès')),
+                        );
+
+                        Navigator.pop(context); // Retour à la page d’accueil
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Veuillez remplir tous les champs')),
+                        );
+                      }
                     },
-                    child: const Text(
-                      'Soumettre',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    child: const Text('Soumettre', style: TextStyle(color: Colors.white)),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -162,7 +153,7 @@ class _FormulairePageState extends State<FormulairePage> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
-        hintText: 'Value',
+        hintText: 'Valeur',
         border: const OutlineInputBorder(),
       ),
     );
@@ -178,12 +169,9 @@ class _FormulairePageState extends State<FormulairePage> {
       value: value,
       decoration: InputDecoration(
         labelText: label,
-        hintText: 'Value',
         border: const OutlineInputBorder(),
       ),
-      items: items
-          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-          .toList(),
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       onChanged: onChanged,
     );
   }
