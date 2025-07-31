@@ -36,27 +36,30 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> fetchConsultations() async {
-    final snapshot = await FirebaseFirestore.instance.collection('consultations').orderBy('date', descending: true).limit(20).get();
+    final snapshot = await FirebaseFirestore.instance
+        .collection('consultations')
+        .orderBy('date', descending: true)
+        .limit(20)
+        .get();
 
     setState(() {
       consultations = snapshot.docs.map((doc) {
         final data = doc.data();
         return {
+          'id': doc.id,
           'nom': data['nom'] ?? '',
           'cmu': data['cmu'] ?? '',
           'pathologie': data['consultation'] ?? '',
           'date': data['date'] ?? '',
         };
-        }).toList();
+      }).toList();
     });
   }
 
   List<Map<String, dynamic>> get filteredConsultations {
     if (searchQuery.trim().isEmpty) return consultations;
-
     return consultations.where((c) =>
-      c['nom'].toString().toLowerCase().contains(searchQuery.toLowerCase())
-    ).toList();
+        c['nom'].toString().toLowerCase().contains(searchQuery.toLowerCase())).toList();
   }
 
   @override
@@ -77,7 +80,7 @@ class _HomeState extends State<Home> {
           ],
         ),
         automaticallyImplyLeading: false,
-        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
@@ -106,124 +109,63 @@ class _HomeState extends State<Home> {
                 await Navigator.pushNamed(context, '/nouvelle_consultation');
                 fetchConsultations(); // rafraîchit après retour
               },
-               ),
+            ),
             const SizedBox(height: 12),
 
             _HomeActionButton(
               title: "GENERER UN RAPPORT",
-              onTap: () {},
+              onTap: () => Navigator.pushNamed(context, '/rapport'),
             ),
             const SizedBox(height: 12),
 
             const Text("CONSULTATIONS RECENTES", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
             const SizedBox(height: 8),
 
-            // Effet menu déroulant si recherche active
-            if (searchQuery.trim().isNotEmpty && filteredConsultations.isNotEmpty)
-              Container(
+            if (filteredConsultations.isEmpty)
+              const Text("Aucune consultation trouvée."),
+
+            ...filteredConsultations.map((c) => InkWell(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/dossier_consultation',
+                  arguments: c['id'],
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: filteredConsultations.length,
-                  itemBuilder: (context, index) {
-                    final c = filteredConsultations[index];
-                    return ListTile(
-                      title: Text("${c['nom']} (${c['cmu']})"),
-                      subtitle: Text(c['pathologie']),
-                      trailing: Text(c['date']),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text("Détails de la consultation"),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Nom : ${c['nom']}"),
-                                Text("CMU : ${c['cmu']}"),
-                                Text("Pathologie : ${c['pathologie']}"),
-                                Text("Date : ${c['date']}"),
-                              ],
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Fermer"),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              )
-              else
-              ...filteredConsultations.map((c) => InkWell(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Détails de la consultation"),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Nom : ${c['nom']}"),
-                          Text("CMU : ${c['cmu']}"),
-                          Text("Pathologie : ${c['pathologie']}"),
-                          Text("Date : ${c['date']}"),
-                        ],
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text("${c['nom']} (${c['cmu']})", style: const TextStyle(color: Colors.black87)),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Fermer"),
-                        ),
-                      ],
                     ),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text("${c['nom']} (${c['cmu']})", style: const TextStyle(color: Colors.black87)),
-                        ),
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(c['date'], style: const TextStyle(color: Colors.black87)),
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(c['date'], style: const TextStyle(color: Colors.black87)),
-                        ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(c['pathologie'], style: const TextStyle(color: Colors.black87)),
                       ),
-                      Expanded(
-                        flex: 3,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(c['pathologie'], style: const TextStyle(color: Colors.black87)),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              )),
+              ),
+            )),
           ],
         ),
       ),
@@ -235,7 +177,7 @@ class _HomeActionButton extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-   const _HomeActionButton({required this.title, required this.onTap});
+  const _HomeActionButton({required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

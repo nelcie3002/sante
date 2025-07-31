@@ -10,6 +10,8 @@ import 'package:sante/screens/reset_password_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sante/screens/change_password_page.dart';
 import 'package:sante/screens/consultations_page.dart';
+import 'package:sante/screens/DossierConsultationPage.dart';
+import 'package:sante/screens/rapport_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -38,6 +40,12 @@ class MyApp extends StatelessWidget {
         '/reset_password': (context) => const ResetPasswordPage(),
         '/change_password': (context) => const ChangePasswordPage(),
         '/consultations': (context) => const ConsultationsPage(),
+        '/dossier_consultation': (context) => DossierConsultationPage(
+          consultationId: ModalRoute.of(context)?.settings.arguments as String,
+        ),
+        '/rapport': (context) => const RapportPage(),
+
+
 
 
       },

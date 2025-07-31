@@ -15,6 +15,9 @@ class _FormulairePageState extends State<FormulairePage> {
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _cmuController = TextEditingController();
   final TextEditingController _autreConsultationController = TextEditingController();
+  final TextEditingController _pathologiesController = TextEditingController();
+  final TextEditingController _traitementsController = TextEditingController();
+  final TextEditingController _profilMedicalController = TextEditingController();
 
   String? _sexe;
   String? _consultation;
@@ -80,6 +83,12 @@ class _FormulairePageState extends State<FormulairePage> {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 12),
+                        _buildTextField(_pathologiesController, 'Pathologies'),
+                        const SizedBox(height: 12),
+                        _buildTextField(_traitementsController, 'Traitements'),
+                        const SizedBox(height: 12),
+                        _buildTextField(_profilMedicalController, 'Profil médical'),
                       ],
                     ),
                   ),
@@ -103,6 +112,10 @@ class _FormulairePageState extends State<FormulairePage> {
                           ? _autreConsultationController.text.trim()
                           : _consultation;
 
+                      final pathologies = _pathologiesController.text.trim();
+                      final traitements = _traitementsController.text.trim();
+                      final profilMedical = _profilMedicalController.text.trim();
+
                       final uid = FirebaseAuth.instance.currentUser?.uid;
 
                       if (uid != null &&
@@ -112,7 +125,7 @@ class _FormulairePageState extends State<FormulairePage> {
                           cmu.isNotEmpty &&
                           sexe != null &&
                           consultationFinale != null &&
-                          consultationFinale!.isNotEmpty) {
+                          consultationFinale.isNotEmpty) {
                         await FirebaseFirestore.instance.collection('consultations').add({
                           'nom': nom,
                           'prenom': prenom,
@@ -120,6 +133,9 @@ class _FormulairePageState extends State<FormulairePage> {
                           'age': age,
                           'sexe': sexe,
                           'consultation': consultationFinale,
+                          'pathologies': pathologies,
+                          'traitements': traitements,
+                          'profilMedical': profilMedical,
                           'date': DateTime.now().toIso8601String(),
                           'createdBy': uid,
                         });
