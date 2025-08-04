@@ -56,12 +56,12 @@ class _RapportPageState extends State<RapportPage> {
   String getAgeRange(String ageStr) {
     final age = int.tryParse(ageStr);
     if (age == null) return 'Inconnu';
-    if (age <= 4) return '0-4ans';
+    if (age <= 4) return '0-4';
     if (age <= 9) return '5-9';
-    if (age <= 14) return '10–14';
-    if (age <= 19) return '15–19';
-    if (age <= 24) return '20–24';
-    if (age <= 49) return '25–49';
+    if (age <= 14) return '10-14';
+    if (age <= 19) return '15-19';
+    if (age <= 24) return '20-24';
+    if (age <= 49) return '25-49';
     return '50+';
   }
 
@@ -69,9 +69,8 @@ class _RapportPageState extends State<RapportPage> {
     final pdf = pw.Document();
     final dateFormatter = DateFormat('dd/MM/yyyy');
 
-    // Regrouper les consultations par pathologie et tranches d’âge
     final Map<String, Map<String, int>> stats = {};
-    final ageRanges = ['0–4', '5–9', '10–14', '15–19', '20–24', '25–49', '50+'];
+    final ageRanges = ['0-4', '5-9', '10-14', '15-19', '20-24', '25-49', '50+'];
 
     for (var c in consultations) {
       final ageRange = getAgeRange(c['age'] ?? '');
@@ -97,7 +96,6 @@ class _RapportPageState extends State<RapportPage> {
       return row;
     }).toList();
 
-    // Ajout ligne de total général
     final totalRow = ['TOTAL'];
     for (var r in ageRanges) {
       final sum = stats.values.fold(0, (prev, e) => prev + e[r]!);
@@ -120,7 +118,7 @@ class _RapportPageState extends State<RapportPage> {
           pw.Table.fromTextArray(
             headers: headers,
             data: data,
-            cellAlignment: pw.Alignment.centerLeft,
+            cellAlignment: pw.Alignment.center,
             headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
             headerDecoration: const pw.BoxDecoration(color: PdfColors.teal100),
             border: pw.TableBorder.all(color: PdfColors.grey),
