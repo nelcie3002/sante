@@ -20,14 +20,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
   String? _sexe;
   String? _fonction;
+  String _role = 'utilisateur'; // Par défaut, chaque nouveau compte est "utilisateur"
+
   final List<String> sexes = ['Masculin', 'Féminin', 'Autre'];
   final List<String> fonctions = ['Médecin', 'Infirmier', 'Technicien de laboratoire', 'Autre (précisez)'];
+  final List<String> roles = ['utilisateur', 'admin'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Créer un compte"),
+        title: const Text("Créer un compte utilisateur"),
         backgroundColor: Colors.teal,
       ),
       body: SingleChildScrollView(
@@ -69,8 +72,10 @@ class _RegisterPageState extends State<RegisterPage> {
             if (_fonction == 'Autre (précisez)')
               Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: _buildTextField(_autreFonctionController, "Précisez votre fonction"),
+                child: _buildTextField(_autreFonctionController, "Précisez la fonction"),
               ),
+            const SizedBox(height: 12),
+            _buildDropdownField(label: 'Rôle', value: _role, items: roles, onChanged: (val) => setState(() => _role = val!)),
             const SizedBox(height: 12),
             _buildTextField(_ideController, "Adresse email"),
             const SizedBox(height: 12),
@@ -91,6 +96,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 final fonctionFinale = _fonction == 'Autre (précisez)' ? _autreFonctionController.text.trim() : _fonction ?? '';
 
                 try {
+                  // Créer le compte utilisateur via Firebase Auth
                   UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                     email: ide,
                     password: motDePasse,
@@ -104,6 +110,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     sexe: sexe,
                     email: ide,
                     fonction: fonctionFinale,
+                    role: _role,
+                    statut: 'actif',
                   );
 
                   await FirebaseFirestore.instance
@@ -112,17 +120,17 @@ class _RegisterPageState extends State<RegisterPage> {
                       .set(utilisateur.toMap());
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Compte créé avec succès !')),
+                    const SnackBar(content: Text('Compte utilisateur créé avec succès !')),
                   );
 
-                  Navigator.pushReplacementNamed(context, '/');
+                  Navigator.pop(context); // Retour au dashboard admin
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Erreur : ${e.toString()}')),
                   );
                 }
               },
-              child: const Text("S'inscrire", style: TextStyle(color: Colors.white)),
+              child: const Text("Créer l'utilisateur", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

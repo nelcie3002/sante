@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sante/widgets/custom_button.dart';
 import 'package:sante/controllers/auth_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({super.key});
@@ -61,7 +63,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           controller: _ideController,
                           decoration: const InputDecoration(
                             labelText: 'Adresse e-mail',
-                            hintText: 'Value',
+                            hintText: 'ex: nom@domaine.com',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -71,7 +73,6 @@ class _ConnexionPageState extends State<ConnexionPage> {
                           obscureText: true,
                           decoration: const InputDecoration(
                             labelText: 'Mot de passe',
-                            hintText: 'Value',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -94,7 +95,38 @@ class _ConnexionPageState extends State<ConnexionPage> {
                             });
 
                             if (error == null) {
-                              Navigator.pushReplacementNamed(context, '/home');
+                              final user = FirebaseAuth.instance.currentUser;
+                              if (user != null) {
+                                final uid = user.uid;
+                                final doc = await FirebaseFirestore.instance
+                                    .collection('utilisateur')
+                                    .doc(uid)
+                                    .get();
+
+                                if (doc.exists) {
+                                  final data = doc.data();
+                                  final role = data?['role'] ?? 'utilisateur';
+                                  final statut = data?['statut'] ?? 'actif';
+
+                                  if (statut == 'bloqué') {
+                                    setState(() {
+                                      _error = "Votre compte est bloqué. Veuillez contacter l’administrateur.";
+                                    });
+                                    await FirebaseAuth.instance.signOut();
+                                    return;
+                                  }
+
+                                  if (role == 'admin') {
+                                    Navigator.pushReplacementNamed(context, '/admin_home');
+                                  } else {
+                                    Navigator.pushReplacementNamed(context, '/home');
+                                  }
+                                } else {
+                                  setState(() {
+                                    _error = "Utilisateur non trouvé dans la base de données.";
+                                  });
+                                }
+                              }
                             }
                           },
                           color: primaryColor,
@@ -111,28 +143,12 @@ class _ConnexionPageState extends State<ConnexionPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Vous n’avez pas de compte ? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/register'); //  MODIFIÉ
-                      },
-                      child: const Text(
-                        "Inscrivez-vous",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                // Supprimé : Inscription libre
+                // const Text("Vous n’avez pas de compte ?"),
+                // const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/reset_password'); // modifié
+                    Navigator.pushNamed(context, '/reset_password');
                   },
                   child: const Text(
                     "Mot de passe oublié ? Cliquez ici",

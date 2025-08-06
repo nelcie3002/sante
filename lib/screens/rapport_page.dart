@@ -28,14 +28,21 @@ class _RapportPageState extends State<RapportPage> {
   }
 
   Future<void> fetchUsers() async {
-    final users = await FirebaseFirestore.instance.collection('users').get();
+    final usersSnapshot = await FirebaseFirestore.instance
+        .collection('utilisateur') // <-- corrigé ici
+        .where('statut', isEqualTo: 'actif') // Optionnel : uniquement les utilisateurs actifs
+        .get();
+
     setState(() {
-      allUsers = users.docs
-          .map((doc) => {
-                'uid': doc.id,
-                'email': doc.data()['email'] ?? doc.id,
-              })
-          .toList();
+      allUsers = usersSnapshot.docs.map((doc) {
+        final data = doc.data();
+        final fullName = "${data['prenom'] ?? ''} ${data['nom'] ?? ''}".trim();
+        return {
+          'uid': doc.id,
+          'email': data['email'] ?? doc.id,
+          'name': fullName.isNotEmpty ? fullName : data['email'] ?? doc.id,
+        };
+      }).toList();
     });
   }
 
@@ -140,7 +147,7 @@ class _RapportPageState extends State<RapportPage> {
             'Période : ${startDate != null ? dateFormatter.format(startDate!) : ''} - ${endDate != null ? dateFormatter.format(endDate!) : ''}',
           ),
           if (selectedUser != null && selectedUser!.isNotEmpty)
-            pw.Text('Utilisateur : ${_getSelectedUserEmail()}'),
+            pw.Text('Utilisateur : ${_getSelectedUserName()}'),
           pw.SizedBox(height: 20),
           pw.Table.fromTextArray(
             headers: headers,
@@ -160,12 +167,12 @@ class _RapportPageState extends State<RapportPage> {
     );
   }
 
-  String _getSelectedUserEmail() {
+  String _getSelectedUserName() {
     final match = allUsers.firstWhere(
       (u) => u['uid'] == selectedUser,
-      orElse: () => {'email': 'Inconnu'},
+      orElse: () => {'name': 'Inconnu'},
     );
-    return match['email'];
+    return match['name'];
   }
 
   @override
@@ -203,11 +210,14 @@ class _RapportPageState extends State<RapportPage> {
               value: selectedUser,
               isExpanded: true,
               items: [
-                const DropdownMenuItem(value: null, child: Text("Tous les utilisateurs")),
+                const DropdownMenuItem(
+                  value: null,
+                  child: Text("Tous les utilisateurs"),
+                ),
                 ...allUsers.map(
                   (user) => DropdownMenuItem(
                     value: user['uid'],
-                    child: Text(user['email']),
+                    child: Text(user['name']),
                   ),
                 ),
               ],

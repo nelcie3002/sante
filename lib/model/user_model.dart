@@ -9,6 +9,9 @@ class Utilisateur {
   final String? lieuNaissance;
   final String? adresse;
   final String? fonction;
+  final String role;
+  final String? statut; // peut valoir 'actif' ou 'bloqué'
+
 
   Utilisateur({
     required this.id,
@@ -21,6 +24,8 @@ class Utilisateur {
     this.lieuNaissance,
     this.adresse,
     required this.fonction,
+    required this.role,
+    this.statut, // add this line to initialize 'statut'
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +38,8 @@ class Utilisateur {
       'contact': contact ?? '',
       'lieuNaissance': lieuNaissance ?? '',
       'adresse': adresse ?? '',
+      'statut': statut,
+
     };
   }
 
@@ -48,6 +55,8 @@ class Utilisateur {
       lieuNaissance: map['lieuNaissance'],
       adresse: map['adresse'],
       fonction: map['fonction'] ?? '',
+      role: map['role'] ?? '',
+      statut: map['statut'] ?? 'actif',
     );
   }
 }
