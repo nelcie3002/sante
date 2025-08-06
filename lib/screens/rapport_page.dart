@@ -18,6 +18,27 @@ class _RapportPageState extends State<RapportPage> {
   List<Map<String, dynamic>> consultations = [];
   bool isLoading = false;
 
+  String? selectedUser;
+  List<Map<String, dynamic>> allUsers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUsers();
+  }
+
+  Future<void> fetchUsers() async {
+    final users = await FirebaseFirestore.instance.collection('users').get();
+    setState(() {
+      allUsers = users.docs
+          .map((doc) => {
+                'uid': doc.id,
+                'email': doc.data()['email'] ?? doc.id,
+              })
+          .toList();
+    });
+  }
+
   Future<void> _selectDateRange(BuildContext context) async {
     final now = DateTime.now();
     final picked = await showDateRangePicker(
@@ -41,14 +62,18 @@ class _RapportPageState extends State<RapportPage> {
 
     setState(() => isLoading = true);
 
-    final snapshot = await FirebaseFirestore.instance
+    Query query = FirebaseFirestore.instance
         .collection('consultations')
         .where('date', isGreaterThanOrEqualTo: startDate!.toIso8601String())
-        .where('date', isLessThanOrEqualTo: endDate!.add(const Duration(days: 1)).toIso8601String())
-        .orderBy('date')
-        .get();
+        .where('date', isLessThanOrEqualTo: endDate!.add(const Duration(days: 1)).toIso8601String());
 
-    consultations = snapshot.docs.map((doc) => doc.data()).toList();
+    if (selectedUser != null && selectedUser!.isNotEmpty) {
+      query = query.where('createdBy', isEqualTo: selectedUser);
+    }
+
+    final snapshot = await query.orderBy('date').get();
+
+    consultations = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
 
     setState(() => isLoading = false);
   }
@@ -77,9 +102,9 @@ class _RapportPageState extends State<RapportPage> {
       final consultation = c['consultation'] ?? 'Inconnu';
 
       stats.putIfAbsent(consultation, () => {
-        for (var r in ageRanges) r: 0,
-        'Total': 0,
-      });
+            for (var r in ageRanges) r: 0,
+            'Total': 0,
+          });
 
       stats[consultation]![ageRange] = stats[consultation]![ageRange]! + 1;
       stats[consultation]!['Total'] = stats[consultation]!['Total']! + 1;
@@ -114,6 +139,8 @@ class _RapportPageState extends State<RapportPage> {
           pw.Text(
             'Période : ${startDate != null ? dateFormatter.format(startDate!) : ''} - ${endDate != null ? dateFormatter.format(endDate!) : ''}',
           ),
+          if (selectedUser != null && selectedUser!.isNotEmpty)
+            pw.Text('Utilisateur : ${_getSelectedUserEmail()}'),
           pw.SizedBox(height: 20),
           pw.Table.fromTextArray(
             headers: headers,
@@ -131,6 +158,14 @@ class _RapportPageState extends State<RapportPage> {
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
     );
+  }
+
+  String _getSelectedUserEmail() {
+    final match = allUsers.firstWhere(
+      (u) => u['uid'] == selectedUser,
+      orElse: () => {'email': 'Inconnu'},
+    );
+    return match['email'];
   }
 
   @override
@@ -159,6 +194,28 @@ class _RapportPageState extends State<RapportPage> {
                   "Période sélectionnée : ${dateFormatter.format(startDate!)} - ${dateFormatter.format(endDate!)}",
                 ),
               ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: "Filtrer par utilisateur (optionnel)",
+                border: OutlineInputBorder(),
+              ),
+              value: selectedUser,
+              isExpanded: true,
+              items: [
+                const DropdownMenuItem(value: null, child: Text("Tous les utilisateurs")),
+                ...allUsers.map(
+                  (user) => DropdownMenuItem(
+                    value: user['uid'],
+                    child: Text(user['email']),
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() => selectedUser = value);
+                fetchFilteredConsultations();
+              },
+            ),
             const SizedBox(height: 20),
             if (isLoading)
               const CircularProgressIndicator()

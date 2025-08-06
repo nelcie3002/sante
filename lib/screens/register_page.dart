@@ -16,9 +16,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _dateNaissanceController = TextEditingController();
   final TextEditingController _ideController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _autreFonctionController = TextEditingController();
 
   String? _sexe;
+  String? _fonction;
   final List<String> sexes = ['Masculin', 'Féminin', 'Autre'];
+  final List<String> fonctions = ['Médecin', 'Infirmier', 'Technicien de laboratoire', 'Autre (précisez)'];
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +63,16 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             const SizedBox(height: 12),
-            _buildDropdownField(),
+            _buildDropdownField(label: 'Sexe', value: _sexe, items: sexes, onChanged: (val) => setState(() => _sexe = val)),
             const SizedBox(height: 12),
-            _buildTextField(_ideController, "IDE (Adresse email)"),
+            _buildDropdownField(label: 'Fonction', value: _fonction, items: fonctions, onChanged: (val) => setState(() => _fonction = val)),
+            if (_fonction == 'Autre (précisez)')
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: _buildTextField(_autreFonctionController, "Précisez votre fonction"),
+              ),
+            const SizedBox(height: 12),
+            _buildTextField(_ideController, "Adresse email"),
             const SizedBox(height: 12),
             _buildTextField(_passwordController, "Mot de passe", isPassword: true),
             const SizedBox(height: 24),
@@ -78,25 +88,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 final sexe = _sexe ?? '';
                 final ide = _ideController.text.trim();
                 final motDePasse = _passwordController.text.trim();
+                final fonctionFinale = _fonction == 'Autre (précisez)' ? _autreFonctionController.text.trim() : _fonction ?? '';
 
                 try {
-                  // 1. Création du compte dans Firebase Auth
                   UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                     email: ide,
                     password: motDePasse,
                   );
 
-                  // 2. Création du modèle utilisateur
                   final utilisateur = Utilisateur(
-                    id: userCredential.user!.uid, // Utilise l'UID Firebase Auth
+                    id: userCredential.user!.uid,
                     nom: nom,
                     prenom: prenom,
                     dateNaissance: dateNaissance,
                     sexe: sexe,
                     email: ide,
+                    fonction: fonctionFinale,
                   );
 
-                  // 3. Ajout à Firestore
                   await FirebaseFirestore.instance
                       .collection('utilisateur')
                       .doc(utilisateur.id)
@@ -128,30 +137,26 @@ class _RegisterPageState extends State<RegisterPage> {
       obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,
-        hintText: hint ?? 'Value',
+        hintText: hint ?? 'Valeur',
         border: const OutlineInputBorder(),
       ),
     );
   }
 
-  Widget _buildDropdownField() {
+  Widget _buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required void Function(String?) onChanged,
+  }) {
     return DropdownButtonFormField<String>(
-      value: _sexe,
-      decoration: const InputDecoration(
-        labelText: 'Sexe',
-        border: OutlineInputBorder(),
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
       ),
-      items: sexes.map((sexe) {
-        return DropdownMenuItem(
-          value: sexe,
-          child: Text(sexe),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _sexe = value;
-        });
-      },
+      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+      onChanged: onChanged,
     );
   }
 }

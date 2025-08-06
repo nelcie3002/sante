@@ -126,6 +126,16 @@ class _FormulairePageState extends State<FormulairePage> {
                           sexe != null &&
                           consultationFinale != null &&
                           consultationFinale.isNotEmpty) {
+                        // 🔽 Récupérer le nom complet du médecin connecté
+                        final userDoc = await FirebaseFirestore.instance
+                            .collection('utilisateur') // Remplace par 'users' si c'est le nom réel
+                            .doc(uid)
+                            .get();
+
+                        final createdByName = userDoc.exists
+                            ? "${userDoc.data()?['nom'] ?? ''} ${userDoc.data()?['prenom'] ?? ''}".trim()
+                            : "Utilisateur inconnu";
+
                         await FirebaseFirestore.instance.collection('consultations').add({
                           'nom': nom,
                           'prenom': prenom,
@@ -138,6 +148,7 @@ class _FormulairePageState extends State<FormulairePage> {
                           'profilMedical': profilMedical,
                           'date': DateTime.now().toIso8601String(),
                           'createdBy': uid,
+                          'createdByName': createdByName, // 🆕 Ajout du nom complet du médecin
                         });
 
                         ScaffoldMessenger.of(context).showSnackBar(

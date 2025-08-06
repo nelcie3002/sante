@@ -85,6 +85,16 @@ class _DossierConsultationPageState extends State<DossierConsultationPage> {
                           _sectionLine("🎂 Âge", "${consultation!['age']} ans"),
                           _sectionLine("🆔 CMU", consultation!['cmu']),
                         ]),
+
+                        const SizedBox(height: 20),
+
+                        // Médecin ayant réalisé la consultation
+                        if (consultation!.containsKey('createdByName'))
+                          _sectionCard([
+                            _sectionTitle("👨‍⚕️ Médecin consulté"),
+                            Text(consultation!['createdByName'], style: const TextStyle(fontSize: 16)),
+                          ]),
+
                         const SizedBox(height: 20),
 
                         // Pathologies
@@ -92,6 +102,7 @@ class _DossierConsultationPageState extends State<DossierConsultationPage> {
                           _sectionTitle("🦠 Pathologies"),
                           Text(consultation!['pathologies'] ?? '-', style: const TextStyle(fontSize: 16)),
                         ]),
+
                         const SizedBox(height: 20),
 
                         // Traitements
@@ -99,6 +110,7 @@ class _DossierConsultationPageState extends State<DossierConsultationPage> {
                           _sectionTitle("💊 Traitements prescrits"),
                           Text(consultation!['traitements'] ?? 'Aucun traitement enregistré', style: const TextStyle(fontSize: 16)),
                         ]),
+
                         const SizedBox(height: 20),
 
                         // Profil médical
@@ -108,6 +120,7 @@ class _DossierConsultationPageState extends State<DossierConsultationPage> {
                           _sectionLine("Allergies", consultation!['allergies'] ?? 'Non précisé'),
                           _sectionLine("Pathologies chroniques", consultation!['pathologiesChroniques'] ?? 'Non précisé'),
                         ]),
+
                         const SizedBox(height: 20),
 
                         // Anciennes consultations

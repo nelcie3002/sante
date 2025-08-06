@@ -60,7 +60,7 @@ class _ConnexionPageState extends State<ConnexionPage> {
                         TextField(
                           controller: _ideController,
                           decoration: const InputDecoration(
-                            labelText: 'IDE',
+                            labelText: 'Adresse e-mail',
                             hintText: 'Value',
                             border: OutlineInputBorder(),
                           ),

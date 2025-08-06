@@ -8,6 +8,7 @@ class Utilisateur {
   final String? contact;
   final String? lieuNaissance;
   final String? adresse;
+  final String? fonction;
 
   Utilisateur({
     required this.id,
@@ -19,6 +20,7 @@ class Utilisateur {
     this.contact,
     this.lieuNaissance,
     this.adresse,
+    required this.fonction,
   });
 
   Map<String, dynamic> toMap() {
@@ -45,6 +47,7 @@ class Utilisateur {
       contact: map['contact'],
       lieuNaissance: map['lieuNaissance'],
       adresse: map['adresse'],
+      fonction: map['fonction'] ?? '',
     );
   }
 }
