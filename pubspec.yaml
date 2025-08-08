@@ -10,7 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
+  # Icônes iOS
   cupertino_icons: ^1.0.8
 
   # Firebase
@@ -22,13 +23,18 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # PDF generation and printing
+  # Génération PDF
   pdf: ^3.10.4
   printing: ^5.12.0
+
+  # Envoi d'emails
+  mailer: ^6.1.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
   flutter_lints: ^5.0.0
 
 flutter:

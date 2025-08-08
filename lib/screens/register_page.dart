@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sante/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sante/model/user_model.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -11,16 +11,17 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _nomController = TextEditingController();
-  final TextEditingController _prenomController = TextEditingController();
-  final TextEditingController _dateNaissanceController = TextEditingController();
-  final TextEditingController _ideController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _autreFonctionController = TextEditingController();
+  final _nomController = TextEditingController();
+  final _prenomController = TextEditingController();
+  final _dateNaissanceController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController(); // ✅ Nouveau champ mot de passe
+  final _matriculeController = TextEditingController();
+  final _autreFonctionController = TextEditingController();
 
   String? _sexe;
   String? _fonction;
-  String _role = 'utilisateur'; // Par défaut, chaque nouveau compte est "utilisateur"
+  String _role = 'utilisateur';
 
   final List<String> sexes = ['Masculin', 'Féminin', 'Autre'];
   final List<String> fonctions = ['Médecin', 'Infirmier', 'Technicien de laboratoire', 'Autre (précisez)'];
@@ -43,18 +44,18 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 12),
             GestureDetector(
               onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
+                DateTime? picked = await showDatePicker(
                   context: context,
                   initialDate: DateTime(2000),
                   firstDate: DateTime(1900),
                   lastDate: DateTime.now(),
                   locale: const Locale('fr', 'FR'),
                 );
-                if (pickedDate != null) {
+                if (picked != null) {
                   _dateNaissanceController.text =
-                      "${pickedDate.day.toString().padLeft(2, '0')}/"
-                      "${pickedDate.month.toString().padLeft(2, '0')}/"
-                      "${pickedDate.year}";
+                      "${picked.day.toString().padLeft(2, '0')}/"
+                      "${picked.month.toString().padLeft(2, '0')}/"
+                      "${picked.year}";
                 }
               },
               child: AbsorbPointer(
@@ -77,9 +78,11 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 12),
             _buildDropdownField(label: 'Rôle', value: _role, items: roles, onChanged: (val) => setState(() => _role = val!)),
             const SizedBox(height: 12),
-            _buildTextField(_ideController, "Adresse email"),
+            _buildTextField(_emailController, "Adresse email"),
             const SizedBox(height: 12),
-            _buildTextField(_passwordController, "Mot de passe", isPassword: true),
+            _buildTextField(_passwordController, "Mot de passe", isPassword: true), // ✅ Champ mot de passe visible
+            const SizedBox(height: 12),
+            _buildTextField(_matriculeController, "Matricule"),
             const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -91,16 +94,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 final prenom = _prenomController.text.trim();
                 final dateNaissance = _dateNaissanceController.text.trim();
                 final sexe = _sexe ?? '';
-                final ide = _ideController.text.trim();
-                final motDePasse = _passwordController.text.trim();
+                final email = _emailController.text.trim();
+                final motDePasse = _passwordController.text.trim(); // ✅ Utilisation du mot de passe saisi
                 final fonctionFinale = _fonction == 'Autre (précisez)' ? _autreFonctionController.text.trim() : _fonction ?? '';
+                final matricule = _matriculeController.text.trim();
 
                 try {
-                  // Créer le compte utilisateur via Firebase Auth
-                  UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                    email: ide,
-                    password: motDePasse,
-                  );
+                  UserCredential userCredential = await FirebaseAuth.instance
+                      .createUserWithEmailAndPassword(email: email, password: motDePasse);
 
                   final utilisateur = Utilisateur(
                     id: userCredential.user!.uid,
@@ -108,10 +109,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     prenom: prenom,
                     dateNaissance: dateNaissance,
                     sexe: sexe,
-                    email: ide,
+                    email: email,
                     fonction: fonctionFinale,
                     role: _role,
                     statut: 'actif',
+                    matricule: matricule,
                   );
 
                   await FirebaseFirestore.instance
@@ -120,10 +122,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       .set(utilisateur.toMap());
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Compte utilisateur créé avec succès !')),
+                    const SnackBar(content: Text('Utilisateur créé avec succès !')),
                   );
-
-                  Navigator.pop(context); // Retour au dashboard admin
+                  Navigator.pop(context);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Erreur : ${e.toString()}')),
@@ -145,7 +146,7 @@ class _RegisterPageState extends State<RegisterPage> {
       obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,
-        hintText: hint ?? 'Valeur',
+        hintText: hint ?? '',
         border: const OutlineInputBorder(),
       ),
     );
