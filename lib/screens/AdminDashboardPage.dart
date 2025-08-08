@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 Future<void> completerChampsUtilisateurs() async {
   final utilisateurs = FirebaseFirestore.instance.collection('utilisateur');
 
@@ -25,9 +27,33 @@ Future<void> completerChampsUtilisateurs() async {
   print("Champs manquants complétés !");
 }
 
-
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Déconnexion"),
+        content: const Text("Voulez-vous vraiment fermer la session ?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Oui"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await FirebaseAuth.instance.signOut();
+      Navigator.of(context).pushReplacementNamed('/');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +61,13 @@ class AdminDashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Tableau de bord administrateur'),
         backgroundColor: Colors.teal,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Déconnexion',
+            onPressed: () => _logout(context),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -50,20 +83,19 @@ class AdminDashboardPage extends StatelessWidget {
               child: ListView(
                 children: [
                   Card(
-  color: Colors.amber[100],
-  child: ListTile(
-    leading: const Icon(Icons.build),
-    title: const Text("Corriger les utilisateurs"),
-    subtitle: const Text("Ajoute les champs manquants : rôle, statut"),
-    onTap: () async {
-      await completerChampsUtilisateurs();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Mise à jour des utilisateurs terminée.")),
-      );
-    },
-  ),
-),
-
+                    color: Colors.amber[100],
+                    child: ListTile(
+                      leading: const Icon(Icons.build),
+                      title: const Text("Corriger les utilisateurs"),
+                      subtitle: const Text("Ajoute les champs manquants : rôle, statut"),
+                      onTap: () async {
+                        await completerChampsUtilisateurs();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Mise à jour des utilisateurs terminée.")),
+                        );
+                      },
+                    ),
+                  ),
                   Card(
                     child: ListTile(
                       leading: const Icon(Icons.person_add),
