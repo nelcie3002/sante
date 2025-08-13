@@ -40,6 +40,7 @@ class _InfosState extends State<Infos> {
     final lieuController = TextEditingController(text: userData?['lieuNaissance'] ?? '');
     final adresseController = TextEditingController(text: userData?['adresse'] ?? '');
     final emailController = TextEditingController(text: userData?['email'] ?? '');
+    final matriculeController = TextEditingController(text: userData?['matricule'] ?? '');
 
     final result = await showDialog<bool>(
       context: context,
@@ -56,6 +57,7 @@ class _InfosState extends State<Infos> {
               _buildInputField("Lieu de naissance", lieuController),
               _buildInputField("Adresse", adresseController),
               _buildInputField("Email", emailController),
+              _buildInputField("Matricule", matriculeController),
             ],
           ),
         ),
@@ -72,6 +74,7 @@ class _InfosState extends State<Infos> {
                 'lieuNaissance': lieuController.text.trim(),
                 'adresse': adresseController.text.trim(),
                 'email': emailController.text.trim(),
+                'matricule': matriculeController.text.trim(),
               });
 
               if (emailController.text.trim().isNotEmpty) {
@@ -109,7 +112,7 @@ class _InfosState extends State<Infos> {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: const Text(''),
+        title: const Text('Mes informations'),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -142,7 +145,6 @@ class _InfosState extends State<Infos> {
                             Text("Nom: ${userData!['nom'] ?? ''}"),
                             Text("Adresse email: ${userData!['email'] ?? ''}"),
                             Text("Contact: ${userData!['contact'] ?? '-'}"),
-                            Text("IDE: ${FirebaseAuth.instance.currentUser?.uid ?? ''}"),
                           ],
                         ),
                       ),
@@ -160,6 +162,7 @@ class _InfosState extends State<Infos> {
                             Text("Lieu de naissance: ${userData!['lieuNaissance'] ?? '-'}"),
                             Text("Adresse: ${userData!['adresse'] ?? '-'}"),
                             Text("Fonction: ${userData!['fonction'] ?? '-'}"),
+                            Text("Matricule: ${userData!['matricule'] ?? '-'}"),
                           ],
                         ),
                       ),
